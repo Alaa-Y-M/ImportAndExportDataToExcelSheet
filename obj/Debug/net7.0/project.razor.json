@@ -14407,6 +14407,78 @@
         }
       },
       {
+        "HashCode": 2143200504,
+        "Kind": "MVC.ViewComponent",
+        "Name": "__Generated__PagerViewComponentTagHelper",
+        "AssemblyName": "ReflectionIT.Mvc.Paging",
+        "CaseSensitive": false,
+        "TagMatchingRules": [
+          {
+            "TagName": "vc:pager",
+            "Attributes": [
+              {
+                "Name": "paging-list"
+              }
+            ]
+          }
+        ],
+        "BoundAttributes": [
+          {
+            "Kind": "MVC.ViewComponent",
+            "Name": "paging-list",
+            "TypeName": "ReflectionIT.Mvc.Paging.IPagingList",
+            "Metadata": {
+              "Common.PropertyName": "pagingList"
+            }
+          }
+        ],
+        "Metadata": {
+          "Runtime.Name": "ITagHelper",
+          "Common.TypeName": "__Generated__PagerViewComponentTagHelper",
+          "MVC.ViewComponent.Name": "Pager"
+        }
+      },
+      {
+        "HashCode": -59851482,
+        "Kind": "MVC.ViewComponent",
+        "Name": "__Generated__PagerWithNamedViewViewComponentTagHelper",
+        "AssemblyName": "ReflectionIT.Mvc.Paging",
+        "CaseSensitive": false,
+        "TagMatchingRules": [
+          {
+            "TagName": "vc:pager-with-named-view",
+            "Attributes": [
+              {
+                "Name": "paging-list"
+              }
+            ]
+          }
+        ],
+        "BoundAttributes": [
+          {
+            "Kind": "MVC.ViewComponent",
+            "Name": "paging-list",
+            "TypeName": "ReflectionIT.Mvc.Paging.IPagingList",
+            "Metadata": {
+              "Common.PropertyName": "pagingList"
+            }
+          },
+          {
+            "Kind": "MVC.ViewComponent",
+            "Name": "view-name",
+            "TypeName": "System.String",
+            "Metadata": {
+              "Common.PropertyName": "viewName"
+            }
+          }
+        ],
+        "Metadata": {
+          "Runtime.Name": "ITagHelper",
+          "Common.TypeName": "__Generated__PagerWithNamedViewViewComponentTagHelper",
+          "MVC.ViewComponent.Name": "PagerWithNamedView"
+        }
+      },
+      {
         "HashCode": -761716918,
         "Kind": "Components.Bind",
         "Name": "Bind",
