@@ -1,0 +1,9 @@
+@* @model IEnumerable<CiscoPSSProducts> *@
+
+<div class="row justify-content-center mt-5 mb-4">
+    <form asp-action="Search" asp-controller="product" class="d-flex w-50" role="searchWord">
+        <input class="form-control me-2" id="searchWord" name="searchWord" type="search" placeholder="Search"
+            aria-label="Search">
+        <button class="btn btn-outline-success" type="submit">Search</button>
+    </form>
+</div>

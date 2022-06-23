@@ -1,0 +1,47 @@
+@model IEnumerable<CiscoPSSProducts>
+
+<div class="row">
+    <div class="col-md-6">
+        <a asp-action="ExportToExcel" asp-controller="product" class="btn btn-primary">
+            Export to Excel
+        </a>
+    </div>
+    <div class="col-md-6">
+        <a asp-action="BatchUpload" asp-controller="product" class="btn btn-primary">
+            Import from Excel
+        </a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <table class="table">
+            <thead>
+                <tr>
+                    <td>Band</td>
+                    <td>CategoryCode</td>
+                    <td>Manufacturer</td>
+                    <td>ItemDescription</td>
+                    <td>PartSKU</td>
+                    <td>DiscountPrice</td>
+                    <td>ListPrice</td>
+                    <td>MinDiscount</td>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in Model)
+                {
+                    <tr>
+                        <td>@product.Band</td>
+                        <td>@product.CategoryCode</td>
+                        <td>@product.Manufacturer</td>
+                        <td>@product.ItemDescription</td>
+                        <td>@product.PartSKU</td>
+                        <td>@product.DiscountPrice</td>
+                        <td>@product.ListPrice</td>
+                        <td>@product.MinDiscount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
