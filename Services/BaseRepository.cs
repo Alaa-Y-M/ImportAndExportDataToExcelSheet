@@ -1,3 +1,4 @@
+using System.IO.Compression;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Task.UI.Common.Interfaces;
@@ -15,6 +16,7 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
     }
     public IEnumerable<T> AddAll(IEnumerable<T> entities)
     {
+        //context.BulkInsert();
         context.Set<T>().AddRange(entities);
         return entities;
     }

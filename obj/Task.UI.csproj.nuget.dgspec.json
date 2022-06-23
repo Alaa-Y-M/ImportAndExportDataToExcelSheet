@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "E:\\Tasks\\task2\\Task.UI\\Task.UI.csproj": {}
+    "E:\\Tasks\\task2\\task.ui\\Task.UI.csproj": {}
   },
   "projects": {
-    "E:\\Tasks\\task2\\Task.UI\\Task.UI.csproj": {
+    "E:\\Tasks\\task2\\task.ui\\Task.UI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "E:\\Tasks\\task2\\Task.UI\\Task.UI.csproj",
+        "projectUniqueName": "E:\\Tasks\\task2\\task.ui\\Task.UI.csproj",
         "projectName": "Task.UI",
-        "projectPath": "E:\\Tasks\\task2\\Task.UI\\Task.UI.csproj",
+        "projectPath": "E:\\Tasks\\task2\\task.ui\\Task.UI.csproj",
         "packagesPath": "C:\\Users\\Alaa\\.nuget\\packages\\",
-        "outputPath": "E:\\Tasks\\task2\\Task.UI\\obj\\",
+        "outputPath": "E:\\Tasks\\task2\\task.ui\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
