@@ -20,7 +20,7 @@ public class ProductController : Controller
     {
         var products = unitOfWork.CiscoPSSProducts.GetAll();
         if (!string.IsNullOrEmpty(search))
-            products = products.Where(p => p.ItemDescription.ToLower().Contains(search) ||
+            products = products.Where(p => p.ItemDescription.Contains(search) ||
             p.Manufacturer.ToLower().Contains(search) || p.CategoryCode.ToLower().Contains(search)).ToList();
         var query = PagingList.Create<CiscoPSSProducts>(products, 10, page);
         return View(query);
@@ -28,11 +28,98 @@ public class ProductController : Controller
     public IActionResult ExportToExcel()
     {
         // Getting the information from our mimic db
+        var result = ExportData();
+        return result;
+    }
+    [HttpGet]
+    public IActionResult BatchUpload()
+    {
+        return View();
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> BatchUpload(IFormFile batchproducts)
+    {
+        if (!ModelState.IsValid)
+        {
+            return View(ModelState);
+        }
+        if (batchproducts?.Length <= 0)
+        {
+            ModelState.AddModelError("Length", "length is zero");
+            return View(ModelState);
+        }
+        var result = await ImportData(batchproducts!);
+        return result;
+    }
+    private async Task<IActionResult> ImportData(IFormFile file)
+    {
+        var stream = file?.OpenReadStream();
+        var products = unitOfWork.CiscoPSSProducts.GetAll();
+        var newProds = new List<CiscoPSSProducts>();
+        try
+        {
+            using (var package = new ExcelPackage(stream))
+            {
+                var worksheet = package.Workbook.Worksheets.First();
+                var rowCount = worksheet.Dimension.Rows;
+
+                for (var row = 4; row <= rowCount; row++)
+                {
+                    try
+                    {
+                        var band = 0;
+                        var categoryCode = worksheet.Cells[row, 2].Value?.ToString();
+                        var manufacturer = worksheet.Cells[row, 3].Value?.ToString();
+                        var itemDescription = worksheet.Cells[row, 4].Value?.ToString();
+                        var partSKU = worksheet.Cells[row, 5].Value?.ToString();
+                        var listPrice = Decimal.Parse(worksheet.Cells[row, 6].Value?.ToString()!);
+                        var minDiscount = Decimal.Parse(worksheet.Cells[row, 7].Value?.ToString()!);
+                        var discountPrice = Decimal.Parse(worksheet.Cells[row, 8].Value?.ToString()!);
+
+
+                        var product = new CiscoPSSProducts
+                        {
+                            Band = band,
+                            CategoryCode = categoryCode!,
+                            Manufacturer = manufacturer!,
+                            ItemDescription = itemDescription!,
+                            PartSKU = partSKU!,
+                            ListPrice = listPrice,
+                            MinDiscount = minDiscount,
+                            DiscountPrice = discountPrice
+                        };
+
+                        newProds.Add(product);
+                        Console.WriteLine("Count is : " + newProds.Count);
+
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+            }
+            foreach (var product in products)
+                newProds.Add(product);
+
+            var products1 = await unitOfWork.CiscoPSSProducts.AddAllAsync(newProds);
+            Console.WriteLine(products1.Count());
+            return RedirectToAction("Index");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return View(ex.Message);
+        }
+    }
+    private IActionResult ExportData()
+    {
         var products = unitOfWork.CiscoPSSProducts.GetAll();
 
         if (products is null)
             return View("Index");
-
         // Start exporting to Excel
         var stream = new MemoryStream();
 
@@ -98,94 +185,5 @@ public class ProductController : Controller
 
         stream.Position = 0;
         return File(stream, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "products.xlsx", true);
-    }
-    [HttpGet]
-    public IActionResult BatchUpload()
-    {
-        return View();
-    }
-
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> BatchUpload(IFormFile batchproducts)
-    {
-        if (!ModelState.IsValid)
-        {
-            return View(ModelState);
-        }
-        if (batchproducts?.Length <= 0)
-        {
-            ModelState.AddModelError("Length", "length is zero");
-            return View(ModelState);
-        }
-
-        // convert to a stream
-        var stream = batchproducts?.OpenReadStream();
-        var products = unitOfWork.CiscoPSSProducts.GetAll();
-        var newProds = new List<CiscoPSSProducts>();
-        try
-        {
-            using (var package = new ExcelPackage(stream))
-            {
-                var worksheet = package.Workbook.Worksheets.First();
-                var rowCount = worksheet.Dimension.Rows;
-
-                for (var row = 4; row <= rowCount; row++)
-                {
-                    try
-                    {
-                        var band = 0;
-                        var categoryCode = worksheet.Cells[row, 2].Value?.ToString();
-                        var manufacturer = worksheet.Cells[row, 3].Value?.ToString();
-                        var itemDescription = worksheet.Cells[row, 4].Value?.ToString();
-                        var partSKU = worksheet.Cells[row, 5].Value?.ToString();
-                        var listPrice = Decimal.Parse(worksheet.Cells[row, 6].Value?.ToString()!);
-                        var minDiscount = Decimal.Parse(worksheet.Cells[row, 7].Value?.ToString()!);
-                        var discountPrice = Decimal.Parse(worksheet.Cells[row, 8].Value?.ToString()!);
-
-
-                        var product = new CiscoPSSProducts
-                        {
-                            Band = band,
-                            CategoryCode = categoryCode!,
-                            Manufacturer = manufacturer!,
-                            ItemDescription = itemDescription!,
-                            PartSKU = partSKU!,
-                            ListPrice = listPrice,
-                            MinDiscount = minDiscount,
-                            DiscountPrice = discountPrice
-                        };
-
-                        newProds.Add(product);
-                        Console.WriteLine("Count is : " + newProds.Count);
-
-                        // await unitOfWork.CiscoPSSProducts.AddOneAsync(product);
-                        // await unitOfWork.CompleteAsync();
-
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
-                }
-            }
-            //var products1 = new List<CiscoPSSProducts>();
-            foreach (var product in products)
-                newProds.Add(product);
-
-            var products1 = await unitOfWork.CiscoPSSProducts.AddAllAsync(newProds);
-            //await unitOfWork.CompleteAsync();
-            Console.WriteLine(products1.Count());
-            // var pSSProducts = unitOfWork.CiscoPSSProducts.GetAll();
-            //Console.WriteLine(pSSProducts.Count());
-            //var query=await PagingList<CiscoPSSProducts>.CreateAsync(products1.OrderBy(n=>n.MinDiscount),)
-            return RedirectToAction("Index");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
-            return View(ex.Message);
-        }
-
     }
 }
