@@ -1,0 +1,59 @@
+@addTagHelper *,ReflectionIT.Mvc.Paging
+@model IPagingList<Citrix3PPSS>
+ 
+<div class="row">
+    <div class="col-md-3">
+        <a asp-action="ExportToExcel" asp-controller="citrix" class="btn btn-outline-warning">
+            Export to Excel
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a asp-action="BatchUpload" asp-controller="citrix" class="btn btn-outline-success">
+            Import from Excel
+        </a>
+    </div>
+    <div class="col-6 mb-3">
+    <form class="d-flex justify-content-center w-auto">
+        <input class="form-control me-2" name="search" type="search" placeholder="Search" aria-label="Search">
+        <button class="btn btn-outline-dark" type="submit">Search</button>
+    </form>
+</div>  
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <table class="table table-sm mt-3 table-bordered table-hover text-center">
+            <thead class="table-dark">
+                <tr>
+                    <td>Band</td>
+                    <td>CategoryCode</td>
+                    <td>Manufacturer</td>
+                    <td>ItemDescription</td>
+                    <td>PartSKU</td>
+                    <td>DiscountPrice</td>
+                    <td>ListPrice</td>
+                    <td>MinDiscount</td>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var Citrix in Model)
+                {
+                    <tr>
+                        <td>@Citrix.Band</td>
+                        <td>@Citrix.CategoryCode</td>
+                        <td>@Citrix.Manufacturer</td>
+                        <td>@Citrix.ItemDescription</td>
+                        <td>@Citrix.PartSKU</td>
+                        <td>@Citrix.DiscountPrice</td>
+                        <td>@Citrix.ListPrice</td>
+                        <td>@Citrix.MinDiscount</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+
+</div>
+<div class="row mb-3">
+    <vc:pager paging-list="@Model"></vc:pager>
+</div>
