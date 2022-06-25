@@ -20,7 +20,7 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
         //await context.BulkInsertAsync<T>(entities.ToList());
         foreach (var entity in entities)
             await context.Set<T>().AddAsync(entity);
-        //await context.SaveChangesAsync();
+        await context.SaveChangesAsync();
         return entities;
     }
 

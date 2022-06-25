@@ -155,16 +155,10 @@ public class ProductController : Controller
                             MinDiscount = minDiscount,
                             DiscountPrice = discountPrice
                         };
-                        if (products.Any(p => p.PartSKU != product.PartSKU))
-                        {
-                            newProds.Add(product);
-                            Console.WriteLine("Count is : " + newProds.Count);
-                        }
-                        else
-                        {
-                            ViewBag.Message = "These records are already in database!";
-                            return View();
-                        }
+
+                        newProds.Add(product);
+                        Console.WriteLine("Count is : " + newProds.Count);
+
                         // await unitOfWork.CiscoPSSProducts.AddOneAsync(product);
                         // await unitOfWork.CompleteAsync();
 
@@ -180,7 +174,7 @@ public class ProductController : Controller
                 newProds.Add(product);
 
             var products1 = await unitOfWork.CiscoPSSProducts.AddAllAsync(newProds);
-            //await unitOfWork.CompleteAsync();
+            await unitOfWork.CompleteAsync();
             Console.WriteLine(products1.Count());
             // var pSSProducts = unitOfWork.CiscoPSSProducts.GetAll();
             //Console.WriteLine(pSSProducts.Count());
