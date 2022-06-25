@@ -174,7 +174,7 @@ public class ProductController : Controller
                 newProds.Add(product);
 
             var products1 = await unitOfWork.CiscoPSSProducts.AddAllAsync(newProds);
-            await unitOfWork.CompleteAsync();
+            //await unitOfWork.CompleteAsync();
             Console.WriteLine(products1.Count());
             // var pSSProducts = unitOfWork.CiscoPSSProducts.GetAll();
             //Console.WriteLine(pSSProducts.Count());
