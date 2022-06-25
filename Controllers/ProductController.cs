@@ -121,8 +121,6 @@ public class ProductController : Controller
 
         // convert to a stream
         var stream = batchproducts?.OpenReadStream();
-        var sw=new StreamContent(stream!).LoadIntoBufferAsync();
-        sw.Dispose();
         var products = unitOfWork.CiscoPSSProducts.GetAll();
         var newProds = new List<CiscoPSSProducts>();
         try
