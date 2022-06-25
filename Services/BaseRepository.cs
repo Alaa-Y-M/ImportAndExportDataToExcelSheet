@@ -1,5 +1,6 @@
 using System.IO.Compression;
 using System.Linq.Expressions;
+using EFCore.BulkExtensions;
 //using EFCore.BulkExtensions;
 using Microsoft.EntityFrameworkCore;
 using Task.UI.Common.Interfaces;
@@ -17,10 +18,10 @@ public class BaseRepository<T> : IBaseRepository<T> where T : class
     }
     public async Task<IEnumerable<T>> AddAllAsync(IEnumerable<T> entities)
     {
-        //await context.BulkInsertAsync<T>(entities.ToList());
-        foreach (var entity in entities)
-            await context.Set<T>().AddAsync(entity);
-        await context.SaveChangesAsync();
+        await context.BulkInsertAsync<T>(entities.ToList());
+        // foreach (var entity in entities)
+        //     await context.Set<T>().AddAsync(entity);
+        // await context.SaveChangesAsync();
         return entities;
     }
 

@@ -49,6 +49,10 @@
               "target": "Package",
               "version": "[11.0.0, )"
             },
+            "EFCore.BulkExtensions": {
+              "target": "Package",
+              "version": "[6.5.2, )"
+            },
             "EPPlus": {
               "target": "Package",
               "version": "[6.0.5, )"
