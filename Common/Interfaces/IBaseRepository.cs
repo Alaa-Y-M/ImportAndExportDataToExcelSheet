@@ -6,7 +6,7 @@ public interface IBaseRepository<T> where T : class
     Task<T> GetByIdAsync(int Id);
     IEnumerable<T> GetAll();
     Task<IEnumerable<T>> FindAllAsync(Expression<Func<T, bool>> criteria);
-    IEnumerable<T> AddAll(IEnumerable<T> entities);
+    Task<IEnumerable<T>> AddAllAsync(IEnumerable<T> entities);
     T AddOne(T entity);
     Task<T> FindAsync(Expression<Func<T, bool>> criteria);
 }

@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using ReflectionIT.Mvc.Paging;
 using Task.UI.Common.Interfaces;
 using Task.UI.Data;
 using Task.UI.Services;
@@ -12,6 +13,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(opt => opt
        m => m.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddPaging(p=>{
+    p.PageParameterName="page";
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

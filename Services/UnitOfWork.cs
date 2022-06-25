@@ -17,9 +17,9 @@ public class UnitOfWork : IUnitOfWork
         CiscoPSSServices = new BaseRepository<CiscoPSSServices>(context);
         Citrix3PPSS = new BaseRepository<Citrix3PPSS>(context);
     }
-    public Task<int> Complete()
+    public async Task<int> CompleteAsync()
     {
-        return context.SaveChangesAsync();
+        return await context.SaveChangesAsync();
     }
 
     public void Dispose()

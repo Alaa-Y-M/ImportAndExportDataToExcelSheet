@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using Task.UI.Common.Interfaces;
 using Task.UI.Data;
+using ReflectionIT.Mvc.Paging;
 
 namespace Task.UI.Controllers;
 public class ProductController : Controller
@@ -13,10 +14,16 @@ public class ProductController : Controller
     {
         unitOfWork = _unitOfWork;
     }
-    public IActionResult Index()
+
+    [Obsolete]
+    public IActionResult Index(int page = 1, string? search = "")
     {
         var products = unitOfWork.CiscoPSSProducts.GetAll();
-        return View(products);
+        if (!string.IsNullOrEmpty(search))
+            products = products.Where(p => p.ItemDescription.ToLower().Contains(search) ||
+            p.Manufacturer.ToLower().Contains(search) || p.CategoryCode.ToLower().Contains(search)).ToList();
+        var query = PagingList.Create<CiscoPSSProducts>(products, 10, page);
+        return View(query);
     }
     public IActionResult ExportToExcel()
     {
@@ -100,7 +107,7 @@ public class ProductController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult BatchUpload(IFormFile batchproducts)
+    public async Task<IActionResult> BatchUpload(IFormFile batchproducts)
     {
         if (!ModelState.IsValid)
         {
@@ -111,8 +118,11 @@ public class ProductController : Controller
             ModelState.AddModelError("Length", "length is zero");
             return View(ModelState);
         }
+
         // convert to a stream
         var stream = batchproducts?.OpenReadStream();
+        var sw=new StreamContent(stream!).LoadIntoBufferAsync();
+        sw.Dispose();
         var products = unitOfWork.CiscoPSSProducts.GetAll();
         var newProds = new List<CiscoPSSProducts>();
         try
@@ -126,14 +136,14 @@ public class ProductController : Controller
                 {
                     try
                     {
-                        var band = Int32.Parse(worksheet.Cells[row, 1].Value?.ToString() ?? null!);
+                        var band = 0;
                         var categoryCode = worksheet.Cells[row, 2].Value?.ToString();
                         var manufacturer = worksheet.Cells[row, 3].Value?.ToString();
                         var itemDescription = worksheet.Cells[row, 4].Value?.ToString();
                         var partSKU = worksheet.Cells[row, 5].Value?.ToString();
-                        var listPrice = Double.Parse(worksheet.Cells[row, 6].Value?.ToString()!);
-                        var minDiscount = Double.Parse(worksheet.Cells[row, 7].Value?.ToString()!);
-                        var discountPrice = Double.Parse(worksheet.Cells[row, 8].Value?.ToString()!);
+                        var listPrice = Decimal.Parse(worksheet.Cells[row, 6].Value?.ToString()!);
+                        var minDiscount = Decimal.Parse(worksheet.Cells[row, 7].Value?.ToString()!);
+                        var discountPrice = Decimal.Parse(worksheet.Cells[row, 8].Value?.ToString()!);
 
 
                         var product = new CiscoPSSProducts
@@ -147,10 +157,19 @@ public class ProductController : Controller
                             MinDiscount = minDiscount,
                             DiscountPrice = discountPrice
                         };
-                        Console.WriteLine(product.Band + " " + product.DiscountPrice + " " + product.PartSKU);
+                        if (products.Any(p => p.PartSKU != product.PartSKU))
+                        {
+                            newProds.Add(product);
+                            Console.WriteLine("Count is : " + newProds.Count);
+                        }
+                        else
+                        {
+                            ViewBag.Message = "These records are already in database!";
+                            return View();
+                        }
                         // await unitOfWork.CiscoPSSProducts.AddOneAsync(product);
                         // await unitOfWork.CompleteAsync();
-                        newProds.Add(product);
+
                     }
                     catch (Exception ex)
                     {
@@ -158,20 +177,17 @@ public class ProductController : Controller
                     }
                 }
             }
-            var products1 = new List<CiscoPSSProducts>();
+            //var products1 = new List<CiscoPSSProducts>();
             foreach (var product in products)
                 newProds.Add(product);
 
-            for (int i = 0; i < newProds.Count; i++)
-            {
-                products1.Add(unitOfWork.CiscoPSSProducts.AddOne(newProds[i]));
-            }
-
-            Console.WriteLine(products1.Count);
-            //unitOfWork.Complete();
+            var products1 = await unitOfWork.CiscoPSSProducts.AddAllAsync(newProds);
+            //await unitOfWork.CompleteAsync();
+            Console.WriteLine(products1.Count());
             // var pSSProducts = unitOfWork.CiscoPSSProducts.GetAll();
             //Console.WriteLine(pSSProducts.Count());
-            return View("Index", products1);
+            //var query=await PagingList<CiscoPSSProducts>.CreateAsync(products1.OrderBy(n=>n.MinDiscount),)
+            return RedirectToAction("Index");
         }
         catch (Exception ex)
         {
@@ -180,15 +196,4 @@ public class ProductController : Controller
         }
 
     }
-    // [HttpGet("{searchWord}")]
-    // public async Task<IActionResult> Search(string searchWord)
-    // {
-    //     if (!string.IsNullOrEmpty(searchWord))
-    //         return View(ModelState);
-
-    //     var query = await unitOfWork.CiscoPSSProducts.FindAllAsync(p => p.PartSKU.Contains(searchWord));
-    //     if (query is null)
-    //         return View(ModelState);
-    //     return View("index", query);
-    // }
 }

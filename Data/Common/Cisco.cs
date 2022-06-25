@@ -14,11 +14,11 @@ public class Cisco
     [Display(Name = "Item description")]
     public string ItemDescription { get; set; } = null!;
     [Display(Name = "List price"), DataType(DataType.Currency)]
-    public double ListPrice { get; set; }
+    public decimal ListPrice { get; set; }
     [Display(Name = "Min Discount")]
-    public double MinDiscount { get; set; }
+    public decimal MinDiscount { get; set; }
     [Display(Name = "Discount price"), DataType(DataType.Currency)]
-    public double DiscountPrice { get; set; }
+    public decimal DiscountPrice { get; set; }
 
 
 }
