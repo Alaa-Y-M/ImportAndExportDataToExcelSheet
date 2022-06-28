@@ -39,7 +39,9 @@ public class ServiceController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> BatchUpload(IFormFile batchservices)
+    [RequestFormLimits(MultipartBodyLengthLimit = 409715200)]
+    [RequestSizeLimit(409715200)]
+    public async Task<IActionResult> BatchUpload(IFormFile batchservices, [FromServices] IWebHostEnvironment webHost)
     {
         if (!ModelState.IsValid)
         {
@@ -50,8 +52,26 @@ public class ServiceController : Controller
             ModelState.AddModelError("Length", "length is zero");
             return View(ModelState);
         }
-        var result = await ImportData(batchservices!);
-        return result;
+        string path = $"{webHost.WebRootPath}\\Uploads";
+        if (!Directory.Exists(path))
+            Directory.CreateDirectory(path);
+        string fileName = $"{path}\\{batchservices?.FileName}";
+        if (!System.IO.File.Exists(fileName))
+        {
+            using (FileStream stream = System.IO.File.Create(fileName))
+            {
+                await batchservices!.CopyToAsync(stream);
+                var result = await ImportData(batchservices!);
+                await stream.FlushAsync();
+                return result;
+            }
+        }
+        using (FileStream stream = System.IO.File.OpenRead(fileName))
+        {
+            var result = await ImportData(batchservices!);
+            await stream.FlushAsync();
+            return result;
+        }
     }
     private async Task<IActionResult> ImportData(IFormFile file)
     {
@@ -62,7 +82,7 @@ public class ServiceController : Controller
         {
             using (var package = new ExcelPackage(stream))
             {
-                var worksheet = package.Workbook.Worksheets.First();
+                var worksheet = package.Workbook.Worksheets[1];
                 var rowCount = worksheet.Dimension.Rows;
 
                 for (var row = 4; row <= rowCount; row++)
@@ -104,7 +124,7 @@ public class ServiceController : Controller
             foreach (var service in services)
                 newServe.Add(service);
 
-            var services1 = await unitOfWork.CiscoPSSServices.AddAllAsync(newServe);
+            var services1 = await unitOfWork.CiscoPSSServices.AddOrUpdateAllAsync(newServe);
             Console.WriteLine(services1.Count());
             return RedirectToAction("Index");
         }

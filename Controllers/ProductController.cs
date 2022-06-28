@@ -39,7 +39,9 @@ public class ProductController : Controller
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> BatchUpload(IFormFile batchproducts)
+    [RequestFormLimits(MultipartBodyLengthLimit = 409715200)]
+    [RequestSizeLimit(409715200)]
+    public async Task<IActionResult> BatchUpload(IFormFile batchproducts, [FromServices] IWebHostEnvironment webHost)
     {
         if (!ModelState.IsValid)
         {
@@ -50,8 +52,26 @@ public class ProductController : Controller
             ModelState.AddModelError("Length", "length is zero");
             return View(ModelState);
         }
-        var result = await ImportData(batchproducts!);
-        return result;
+        string path = $"{webHost.WebRootPath}\\Uploads";
+        if (!Directory.Exists(path))
+            Directory.CreateDirectory(path);
+        string fileName = $"{path}\\{batchproducts?.FileName}";
+        if (!System.IO.File.Exists(fileName))
+        {
+            using (FileStream stream = System.IO.File.Create(fileName))
+            {
+                await batchproducts!.CopyToAsync(stream);
+                var result = await ImportData(batchproducts!);
+                await stream.FlushAsync();
+                return result;
+            }
+        }
+        using (FileStream stream = System.IO.File.OpenRead(fileName))
+        {
+            var result = await ImportData(batchproducts!);
+            await stream.FlushAsync();
+            return result;
+        }
     }
     private async Task<IActionResult> ImportData(IFormFile file)
     {
@@ -104,7 +124,7 @@ public class ProductController : Controller
             foreach (var product in products)
                 newProds.Add(product);
 
-            var products1 = await unitOfWork.CiscoPSSProducts.AddAllAsync(newProds);
+            var products1 = await unitOfWork.CiscoPSSProducts.AddOrUpdateAllAsync(newProds);
             Console.WriteLine(products1.Count());
             return RedirectToAction("Index");
         }

@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "MOYH15Ppvl9iaCw9ie6jVNfBt5bVfV7Q4ejjqbrHMUE=",
+  "Hash": "kLCayNIT1b+NLslHe5hTDS0Dmvv5d4G6FwwnbvBOGDU=",
   "Source": "Task.UI",
   "BasePath": "_content/Task.UI",
   "Mode": "Default",
@@ -1069,6 +1069,23 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\lib\\jquery\\LICENSE.txt"
+    },
+    {
+      "Identity": "F:\\task2\\Task.UI\\wwwroot\\Uploads\\prods.xlsx",
+      "SourceId": "Task.UI",
+      "SourceType": "Discovered",
+      "ContentRoot": "F:\\task2\\Task.UI\\wwwroot\\",
+      "BasePath": "_content/Task.UI",
+      "RelativePath": "Uploads/prods.xlsx",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\Uploads\\prods.xlsx"
     }
   ]
 }

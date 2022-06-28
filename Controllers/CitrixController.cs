@@ -37,9 +37,11 @@ public class CitrixController : Controller
         return View();
     }
 
-    [HttpPost]
+        [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> BatchUpload(IFormFile batchcitrix)
+    [RequestFormLimits(MultipartBodyLengthLimit = 409715200)]
+    [RequestSizeLimit(409715200)]
+    public async Task<IActionResult> BatchUpload(IFormFile batchcitrix, [FromServices] IWebHostEnvironment webHost)
     {
         if (!ModelState.IsValid)
         {
@@ -50,8 +52,26 @@ public class CitrixController : Controller
             ModelState.AddModelError("Length", "length is zero");
             return View(ModelState);
         }
-        var result = await ImportData(batchcitrix!);
-        return result;
+        string path = $"{webHost.WebRootPath}\\Uploads";
+        if (!Directory.Exists(path))
+            Directory.CreateDirectory(path);
+        string fileName = $"{path}\\{batchcitrix?.FileName}";
+        if (!System.IO.File.Exists(fileName))
+        {
+            using (FileStream stream = System.IO.File.Create(fileName))
+            {
+                await batchcitrix!.CopyToAsync(stream);
+                var result = await ImportData(batchcitrix!);
+                await stream.FlushAsync();
+                return result;
+            }
+        }
+        using (FileStream stream = System.IO.File.OpenRead(fileName))
+        {
+            var result = await ImportData(batchcitrix!);
+            await stream.FlushAsync();
+            return result;
+        }
     }
     private async Task<IActionResult> ImportData(IFormFile file)
     {
@@ -62,7 +82,7 @@ public class CitrixController : Controller
         {
             using (var package = new ExcelPackage(stream))
             {
-                var worksheet = package.Workbook.Worksheets.First();
+                var worksheet = package.Workbook.Worksheets[2];
                 var rowCount = worksheet.Dimension.Rows;
 
                 for (var row = 4; row <= rowCount; row++)
@@ -104,7 +124,7 @@ public class CitrixController : Controller
             foreach (var citrix in citrixs)
                 newProds.Add(citrix);
 
-            var citrix1 = await unitOfWork.Citrix3PPSS.AddAllAsync(newProds);
+            var citrix1 = await unitOfWork.Citrix3PPSS.AddOrUpdateAllAsync(newProds);
             Console.WriteLine(citrix1.Count());
             return RedirectToAction("Index");
         }
